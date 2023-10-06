@@ -35,6 +35,7 @@ export const Canvas: React.FC = () => {
   ]);
   const [currentDirection, setCurrentDirection] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const movementInterval = useRef<number | null>(null);
+  const directionBuffer = useRef<{ x: number; y: number }[]>([]);
 
   const handleKeydown = (e: KeyboardEvent) => {
     let newDirection = null;
@@ -55,7 +56,10 @@ export const Canvas: React.FC = () => {
     }
 
     if (newDirection) {
-      setCurrentDirection(newDirection);
+      directionBuffer.current.push(newDirection);
+      if (directionBuffer.current.length > 2) {
+        directionBuffer.current.shift();
+      }
     }
   };
 
@@ -63,8 +67,12 @@ export const Canvas: React.FC = () => {
     if (movementInterval.current) {
       clearInterval(movementInterval.current);
     }
-    
+
     movementInterval.current = window.setInterval(() => {
+      if (directionBuffer.current.length) {
+        setCurrentDirection(directionBuffer.current.shift()!);
+      }
+
       setSnake((prevSnake) => {
         const newHead = {
           x: prevSnake[0].x + currentDirection.x * moveAmount,
