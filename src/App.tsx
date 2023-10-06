@@ -1,12 +1,14 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import { Canvas } from './components/Canvas';
+import React from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import { SnakeGame } from "./components/snakeGame/SnakeGame";
 
 function App() {
   return (
     <div className="App">
-      <Canvas />
+      <div style={{marginTop: '200px'}}>
+        <SnakeGame />
+      </div>
       {/* <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>

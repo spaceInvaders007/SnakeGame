@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import { GameOver } from "./GameOver";
 
 const radius = 10;
 const moveAmount = 2 * radius;
@@ -25,7 +26,9 @@ const checkCollision = (
 const initialFoodRandomPosition = generateRandomGridPosition();
 const initialSnakeRandomPosition = generateRandomGridPosition();
 
-export const Canvas: React.FC = () => {
+export const SnakeGame: React.FC = () => {
+  const [gameOver, setGameOver] = useState<boolean>(false);
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [foodPos, setFoodPos] = useState<{ x: number; y: number } | null>(
     initialFoodRandomPosition
@@ -33,11 +36,19 @@ export const Canvas: React.FC = () => {
   const [snake, setSnake] = useState<Array<{ x: number; y: number }>>([
     initialSnakeRandomPosition,
   ]);
-  const [currentDirection, setCurrentDirection] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [currentDirection, setCurrentDirection] = useState<{
+    x: number;
+    y: number;
+  }>({ x: 0, y: 0 });
   const movementInterval = useRef<number | null>(null);
   const directionBuffer = useRef<{ x: number; y: number }[]>([]);
 
   const handleKeydown = (e: KeyboardEvent) => {
+
+    if (gameOver) {
+      return;
+    }
+    
     let newDirection = null;
 
     switch (e.key) {
@@ -85,6 +96,10 @@ export const Canvas: React.FC = () => {
           newHead.y < radius ||
           newHead.y > canvasSize - radius
         ) {
+          setGameOver(true);
+          if (movementInterval.current !== null) {
+            clearInterval(movementInterval.current);
+          }
           return prevSnake;
         }
 
@@ -105,7 +120,6 @@ export const Canvas: React.FC = () => {
         clearInterval(movementInterval.current);
       }
     };
-
   }, [currentDirection, foodPos]);
 
   useEffect(() => {
@@ -139,11 +153,29 @@ export const Canvas: React.FC = () => {
   }, [snake, foodPos]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={canvasSize}
-      height={canvasSize}
-      style={{ border: "1px solid black" }}
-    ></canvas>
+    <>
+      {gameOver ? <GameOver /> : null}
+      <canvas
+        ref={canvasRef}
+        width={canvasSize}
+        height={canvasSize}
+        style={{
+          border: "8px solid #649b74",
+          outline: "2px solid #649b74",
+          borderImageSlice: "1",
+          boxShadow: "inset 0 0 0 2px #649b74",
+          borderImageSource: `
+            repeating-linear-gradient(
+              -75deg,
+              #649b74,
+              #649b74 10px,
+              white 10px,
+              white 20px
+            )
+          `,
+          borderRadius: "8px"
+        }}
+      ></canvas>
+    </>
   );
 };
