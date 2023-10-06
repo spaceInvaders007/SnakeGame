@@ -33,33 +33,42 @@ export const Canvas: React.FC = () => {
   const [snake, setSnake] = useState<Array<{ x: number; y: number }>>([
     initialSnakeRandomPosition,
   ]);
+  const [currentDirection, setCurrentDirection] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const movementInterval = useRef<number | null>(null);
 
   const handleKeydown = (e: KeyboardEvent) => {
+    let newDirection = null;
+
+    switch (e.key) {
+      case "ArrowUp":
+        if (currentDirection.y === 0) newDirection = { x: 0, y: -1 };
+        break;
+      case "ArrowDown":
+        if (currentDirection.y === 0) newDirection = { x: 0, y: 1 };
+        break;
+      case "ArrowLeft":
+        if (currentDirection.x === 0) newDirection = { x: -1, y: 0 };
+        break;
+      case "ArrowRight":
+        if (currentDirection.x === 0) newDirection = { x: 1, y: 0 };
+        break;
+    }
+
+    if (newDirection) {
+      setCurrentDirection(newDirection);
+    }
+  };
+
+  useEffect(() => {
     if (movementInterval.current) {
       clearInterval(movementInterval.current);
     }
-
+    
     movementInterval.current = window.setInterval(() => {
       setSnake((prevSnake) => {
-        const direction = (() => {
-          switch (e.key) {
-            case "ArrowUp":
-              return { x: 0, y: -1 };
-            case "ArrowDown":
-              return { x: 0, y: 1 };
-            case "ArrowLeft":
-              return { x: -1, y: 0 };
-            case "ArrowRight":
-              return { x: 1, y: 0 };
-            default:
-              return { x: 0, y: 0 };
-          }
-        })();
-
         const newHead = {
-          x: prevSnake[0].x + direction.x * moveAmount,
-          y: prevSnake[0].y + direction.y * moveAmount,
+          x: prevSnake[0].x + currentDirection.x * moveAmount,
+          y: prevSnake[0].y + currentDirection.y * moveAmount,
         };
 
         if (
@@ -82,22 +91,21 @@ export const Canvas: React.FC = () => {
         return newSnake;
       });
     }, 200);
-  };
+
+    return () => {
+      if (movementInterval.current !== null) {
+        clearInterval(movementInterval.current);
+      }
+    };
+
+  }, [currentDirection, foodPos]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeydown);
     return () => {
       window.removeEventListener("keydown", handleKeydown);
     };
-  }, [foodPos]);
-
-  useEffect(() => {
-    return () => {
-      if (movementInterval.current !== null) {
-        clearInterval(movementInterval.current);
-      }
-    };
-  }, []);
+  }, [currentDirection]);
 
   useEffect(() => {
     if (canvasRef.current) {
