@@ -21,7 +21,7 @@ const initialRandomPosition = generateRandomGridPosition()
 export const Canvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [foodPos, setFoodPos] = useState<{ x: number; y: number } | null>(initialRandomPosition);
-  const [snakePos, setSnakePos] = useState({ x: 200, y: 200 });
+  const [snakePos, setSnakePos] = useState<{ x: number; y: number }>(initialRandomPosition);
   const movementInterval = useRef<number | null>(null);
 
   const handleKeydown = (e: KeyboardEvent) => {
