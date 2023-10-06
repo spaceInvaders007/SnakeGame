@@ -1,8 +1,27 @@
 import React, { useRef, useEffect, useState } from "react";
 
+const radius = 10;
+const moveAmount = 2 * radius;
+const canvasSize = 400;
+const gridSize = 2 * radius;
+const numberOfGridSquares = canvasSize / gridSize;
+
+const generateRandomGridPosition = (): { x: number; y: number } => {
+    const x = Math.floor(Math.random() * numberOfGridSquares) * gridSize + radius;
+    const y = Math.floor(Math.random() * numberOfGridSquares) * gridSize + radius;
+    return { x, y };
+};
+
+const checkCollision = (p1: { x: number; y: number }, p2: { x: number; y: number }): boolean => {
+    return p1.x === p2.x && p1.y === p2.y;
+};
+
+const initialRandomPosition = generateRandomGridPosition()
+
 export const Canvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [pos, setPos] = useState({ x: 200, y: 200 });
+  const [foodPos, setFoodPos] = useState<{ x: number; y: number } | null>(initialRandomPosition);
+  const [snakePos, setSnakePos] = useState({ x: 200, y: 200 });
   const movementInterval = useRef<number | null>(null);
 
   const handleKeydown = (e: KeyboardEvent) => {
@@ -10,11 +29,8 @@ export const Canvas: React.FC = () => {
       clearInterval(movementInterval.current);
     }
 
-    const moveAmount = 10;
-    const radius = 10;
-
     movementInterval.current = window.setInterval(() => {
-      setPos((prevPos) => {
+      setSnakePos((prevPos) => {
         let newX = prevPos.x;
         let newY = prevPos.y;
 
@@ -23,30 +39,24 @@ export const Canvas: React.FC = () => {
             newY = Math.max(newY - moveAmount, radius);
             break;
           case "ArrowDown":
-            newY = Math.min(newY + moveAmount, 400 - radius);
+            newY = Math.min(newY + moveAmount, canvasSize - radius);
             break;
           case "ArrowLeft":
             newX = Math.max(newX - moveAmount, radius);
             break;
           case "ArrowRight":
-            newX = Math.min(newX + moveAmount, 400 - radius);
+            newX = Math.min(newX + moveAmount, canvasSize - radius);
             break;
         }
 
-        if (
-          newY === radius ||
-          newY === 400 - radius ||
-          newX === radius ||
-          newX === 400 - radius
-        ) {
-          if (movementInterval.current !== null) {
-            clearInterval(movementInterval.current);
-          }
+        if (foodPos && checkCollision({ x: newX, y: newY }, foodPos)) {
+          console.log("Collision detected!");
+          setFoodPos(generateRandomGridPosition());
         }
 
         return { x: newX, y: newY };
       });
-    }, 100);
+    }, 200);
   };
 
   useEffect(() => {
@@ -54,7 +64,7 @@ export const Canvas: React.FC = () => {
     return () => {
       window.removeEventListener("keydown", handleKeydown);
     };
-  }, []);
+  }, [foodPos]);
 
   useEffect(() => {
     return () => {
@@ -68,14 +78,21 @@ export const Canvas: React.FC = () => {
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext("2d");
       if (ctx) {
-        ctx.clearRect(0, 0, 400, 400);
+        ctx.clearRect(0, 0, canvasSize, canvasSize);
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
+        ctx.arc(snakePos.x, snakePos.y, radius, 0, Math.PI * 2);
         ctx.fillStyle = "blue";
         ctx.fill();
+
+        if (foodPos) {
+          ctx.beginPath();
+          ctx.arc(foodPos.x, foodPos.y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = "red";
+          ctx.fill();
+        }
       }
     }
-  }, [pos]);
+  }, [snakePos, foodPos]);
 
-  return <canvas ref={canvasRef} width={400} height={400}></canvas>;
+  return <canvas ref={canvasRef} width={canvasSize} height={canvasSize}></canvas>;
 };
