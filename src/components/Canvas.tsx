@@ -7,21 +7,32 @@ const gridSize = 2 * radius;
 const numberOfGridSquares = canvasSize / gridSize;
 
 const generateRandomGridPosition = (): { x: number; y: number } => {
-    const x = Math.floor(Math.random() * numberOfGridSquares) * gridSize + radius;
-    const y = Math.floor(Math.random() * numberOfGridSquares) * gridSize + radius;
-    return { x, y };
+  const x = Math.floor(Math.random() * numberOfGridSquares) * gridSize + radius;
+  const y = Math.floor(Math.random() * numberOfGridSquares) * gridSize + radius;
+  return { x, y };
 };
 
-const checkCollision = (p1: { x: number; y: number }, p2: { x: number; y: number }): boolean => {
+const checkCollision = (
+  p1: { x: number; y: number },
+  p2: { x: number; y: number } | null
+): boolean => {
+  if (p2) {
     return p1.x === p2.x && p1.y === p2.y;
+  }
+  return false;
 };
 
-const initialRandomPosition = generateRandomGridPosition()
+const initialFoodRandomPosition = generateRandomGridPosition();
+const initialSnakeRandomPosition = generateRandomGridPosition();
 
 export const Canvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [foodPos, setFoodPos] = useState<{ x: number; y: number } | null>(initialRandomPosition);
-  const [snakePos, setSnakePos] = useState<{ x: number; y: number }>(initialRandomPosition);
+  const [foodPos, setFoodPos] = useState<{ x: number; y: number } | null>(
+    initialFoodRandomPosition
+  );
+  const [snake, setSnake] = useState<Array<{ x: number; y: number }>>([
+    initialSnakeRandomPosition,
+  ]);
   const movementInterval = useRef<number | null>(null);
 
   const handleKeydown = (e: KeyboardEvent) => {
@@ -30,31 +41,45 @@ export const Canvas: React.FC = () => {
     }
 
     movementInterval.current = window.setInterval(() => {
-      setSnakePos((prevPos) => {
-        let newX = prevPos.x;
-        let newY = prevPos.y;
+      setSnake((prevSnake) => {
+        const direction = (() => {
+          switch (e.key) {
+            case "ArrowUp":
+              return { x: 0, y: -1 };
+            case "ArrowDown":
+              return { x: 0, y: 1 };
+            case "ArrowLeft":
+              return { x: -1, y: 0 };
+            case "ArrowRight":
+              return { x: 1, y: 0 };
+            default:
+              return { x: 0, y: 0 };
+          }
+        })();
 
-        switch (e.key) {
-          case "ArrowUp":
-            newY = Math.max(newY - moveAmount, radius);
-            break;
-          case "ArrowDown":
-            newY = Math.min(newY + moveAmount, canvasSize - radius);
-            break;
-          case "ArrowLeft":
-            newX = Math.max(newX - moveAmount, radius);
-            break;
-          case "ArrowRight":
-            newX = Math.min(newX + moveAmount, canvasSize - radius);
-            break;
+        const newHead = {
+          x: prevSnake[0].x + direction.x * moveAmount,
+          y: prevSnake[0].y + direction.y * moveAmount,
+        };
+
+        if (
+          newHead.x < radius ||
+          newHead.x > canvasSize - radius ||
+          newHead.y < radius ||
+          newHead.y > canvasSize - radius
+        ) {
+          return prevSnake;
         }
 
-        if (foodPos && checkCollision({ x: newX, y: newY }, foodPos)) {
-          console.log("Collision detected!");
+        let newSnake = [newHead, ...prevSnake];
+
+        if (checkCollision(newHead, foodPos)) {
           setFoodPos(generateRandomGridPosition());
+        } else {
+          newSnake.pop();
         }
 
-        return { x: newX, y: newY };
+        return newSnake;
       });
     }, 200);
   };
@@ -79,10 +104,13 @@ export const Canvas: React.FC = () => {
       const ctx = canvasRef.current.getContext("2d");
       if (ctx) {
         ctx.clearRect(0, 0, canvasSize, canvasSize);
-        ctx.beginPath();
-        ctx.arc(snakePos.x, snakePos.y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = "blue";
-        ctx.fill();
+
+        snake.forEach((segment) => {
+          ctx.beginPath();
+          ctx.arc(segment.x, segment.y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = "blue";
+          ctx.fill();
+        });
 
         if (foodPos) {
           ctx.beginPath();
@@ -92,7 +120,14 @@ export const Canvas: React.FC = () => {
         }
       }
     }
-  }, [snakePos, foodPos]);
+  }, [snake, foodPos]);
 
-  return <canvas ref={canvasRef} width={canvasSize} height={canvasSize}></canvas>;
+  return (
+    <canvas
+      ref={canvasRef}
+      width={canvasSize}
+      height={canvasSize}
+      style={{ border: "1px solid black" }}
+    ></canvas>
+  );
 };
