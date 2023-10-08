@@ -135,11 +135,22 @@ export const SnakeGame: React.FC = () => {
       if (ctx) {
         ctx.clearRect(0, 0, canvasSize, canvasSize);
 
-        snake.forEach((segment) => {
+        snake.forEach((segment, index) => {
           ctx.beginPath();
-          ctx.arc(segment.x, segment.y, radius, 0, Math.PI * 2);
+          ctx.rect(segment.x - radius, segment.y - radius, 2 * radius, 2 * radius);
           ctx.fillStyle = "blue";
           ctx.fill();
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = "white";
+          if (index !== 0) {
+            // Draw a white line between segments, except for the head.
+            ctx.moveTo(segment.x - radius, segment.y - radius);
+            ctx.lineTo(segment.x + radius, segment.y - radius);
+            ctx.lineTo(segment.x + radius, segment.y + radius);
+            ctx.lineTo(segment.x - radius, segment.y + radius);
+            ctx.lineTo(segment.x - radius, segment.y - radius);
+          }
+          ctx.stroke();
         });
 
         if (foodPos) {
