@@ -23,6 +23,19 @@ const checkCollision = (
   return false;
 };
 
+const checkSelfCollision = (snake: {
+  x: number;
+  y: number;
+}[]): boolean => {
+  const head = snake[0];
+  for (let i = 1; i < snake.length; i++) {
+    if (head.x === snake[i].x && head.y === snake[i].y) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const initialFoodRandomPosition = generateRandomGridPosition();
 const initialSnakeRandomPosition = generateRandomGridPosition();
 
@@ -94,7 +107,8 @@ export const SnakeGame: React.FC = () => {
           newHead.x < radius ||
           newHead.x > canvasSize - radius ||
           newHead.y < radius ||
-          newHead.y > canvasSize - radius
+          newHead.y > canvasSize - radius ||
+          checkSelfCollision(prevSnake)
         ) {
           setGameOver(true);
           if (movementInterval.current !== null) {
