@@ -59,6 +59,7 @@ export const SnakeGame: React.FC = () => {
   const handleKeydown = (e: KeyboardEvent) => {
 
     if (gameOver) {
+      directionBuffer.current = [];
       return;
     }
     
@@ -93,6 +94,10 @@ export const SnakeGame: React.FC = () => {
     }
 
     movementInterval.current = window.setInterval(() => {
+      if (gameOver) {
+        return;
+      }
+      
       if (directionBuffer.current.length) {
         setCurrentDirection(directionBuffer.current.shift()!);
       }
@@ -111,6 +116,7 @@ export const SnakeGame: React.FC = () => {
           checkSelfCollision(prevSnake)
         ) {
           setGameOver(true);
+          directionBuffer.current = [];
           if (movementInterval.current !== null) {
             clearInterval(movementInterval.current);
           }
