@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { GameOver } from "./GameOver";
+import RestartButton from "./RestartButton";
 
 const radius = 10;
 const moveAmount = 2 * radius;
@@ -23,10 +24,12 @@ const checkCollision = (
   return false;
 };
 
-const checkSelfCollision = (snake: {
-  x: number;
-  y: number;
-}[]): boolean => {
+const checkSelfCollision = (
+  snake: {
+    x: number;
+    y: number;
+  }[]
+): boolean => {
   const head = snake[0];
   for (let i = 1; i < snake.length; i++) {
     if (head.x === snake[i].x && head.y === snake[i].y) {
@@ -57,12 +60,11 @@ export const SnakeGame: React.FC = () => {
   const directionBuffer = useRef<{ x: number; y: number }[]>([]);
 
   const handleKeydown = (e: KeyboardEvent) => {
-
     if (gameOver) {
       directionBuffer.current = [];
       return;
     }
-    
+
     let newDirection = null;
 
     switch (e.key) {
@@ -97,7 +99,7 @@ export const SnakeGame: React.FC = () => {
       if (gameOver) {
         return;
       }
-      
+
       if (directionBuffer.current.length) {
         setCurrentDirection(directionBuffer.current.shift()!);
       }
@@ -157,7 +159,12 @@ export const SnakeGame: React.FC = () => {
 
         snake.forEach((segment, index) => {
           ctx.beginPath();
-          ctx.rect(segment.x - radius, segment.y - radius, 2 * radius, 2 * radius);
+          ctx.rect(
+            segment.x - radius,
+            segment.y - radius,
+            2 * radius,
+            2 * radius
+          );
           ctx.fillStyle = "blue";
           ctx.fill();
           ctx.lineWidth = 1;
@@ -183,30 +190,29 @@ export const SnakeGame: React.FC = () => {
     }
   }, [snake, foodPos]);
 
+  const handleRestartClick = () => {
+    setSnake([initialSnakeRandomPosition]);
+    setFoodPos(initialFoodRandomPosition);
+    setCurrentDirection({ x: 0, y: 0 });
+    setGameOver(false);
+  };
+
   return (
-    <>
+    <div style={{display: "flex", flexDirection: "column"}}>
+      <RestartButton onClick={handleRestartClick} gameOver={!!gameOver} /> 
+
       {gameOver ? <GameOver /> : null}
-      <canvas
-        ref={canvasRef}
-        width={canvasSize}
-        height={canvasSize}
-        style={{
-          border: "8px solid #649b74",
-          outline: "2px solid #649b74",
-          borderImageSlice: "1",
-          boxShadow: "inset 0 0 0 2px #649b74",
-          borderImageSource: `
-            repeating-linear-gradient(
-              -75deg,
-              #649b74,
-              #649b74 10px,
-              white 10px,
-              white 20px
-            )
-          `,
-          borderRadius: "8px"
-        }}
-      ></canvas>
-    </>
+      <div>
+        <canvas
+          ref={canvasRef}
+          width={canvasSize}
+          height={canvasSize}
+          style={{
+            border: "8px solid #d8931b",
+            borderRadius: "8px",
+          }}
+        ></canvas>
+      </div>
+    </div>
   );
 };

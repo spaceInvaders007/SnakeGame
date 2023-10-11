@@ -44,10 +44,10 @@ export const GameOver: React.FC = () => {
         padding: "20px",
         width: "320px",
         height: "80px",
-        background: "#9c638a",
+        background: "#acbe25",
         backgroundSize: "40px 40px",
         borderRadius: "10px",
-        border: "5px solid #905aa5",
+        border: "10px solid #acbe25",
         boxShadow: "0 0 15px rgba(0,0,0,0.5)",
       }}
     >
