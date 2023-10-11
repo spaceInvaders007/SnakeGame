@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { GameOver } from "./GameOver";
-import RestartButton from "./RestartButton";
+import { NewGameButton } from "./NewGameButton";
 
 const radius = 10;
 const moveAmount = 2 * radius;
@@ -40,7 +40,8 @@ const checkSelfCollision = (
 };
 
 const initialFoodRandomPosition = generateRandomGridPosition();
-const initialSnakeRandomPosition = generateRandomGridPosition();
+const initialSnakePosition = {x: 150, y: 30};
+
 
 export const SnakeGame: React.FC = () => {
   const [gameOver, setGameOver] = useState<boolean>(false);
@@ -50,12 +51,12 @@ export const SnakeGame: React.FC = () => {
     initialFoodRandomPosition
   );
   const [snake, setSnake] = useState<Array<{ x: number; y: number }>>([
-    initialSnakeRandomPosition,
+    initialSnakePosition,
   ]);
   const [currentDirection, setCurrentDirection] = useState<{
     x: number;
     y: number;
-  }>({ x: 0, y: 0 });
+  }>({ x: 0, y: 1 });
   const movementInterval = useRef<number | null>(null);
   const directionBuffer = useRef<{ x: number; y: number }[]>([]);
 
@@ -191,15 +192,15 @@ export const SnakeGame: React.FC = () => {
   }, [snake, foodPos]);
 
   const handleRestartClick = () => {
-    setSnake([initialSnakeRandomPosition]);
-    setFoodPos(initialFoodRandomPosition);
-    setCurrentDirection({ x: 0, y: 0 });
+    setSnake([initialSnakePosition]);
+    setFoodPos(generateRandomGridPosition());
+    setCurrentDirection({ x: 0, y: 1 });
     setGameOver(false);
   };
 
   return (
     <div style={{display: "flex", flexDirection: "column"}}>
-      <RestartButton onClick={handleRestartClick} gameOver={!!gameOver} /> 
+      <NewGameButton onClick={handleRestartClick} gameOver={!!gameOver} /> 
 
       {gameOver ? <GameOver /> : null}
       <div>

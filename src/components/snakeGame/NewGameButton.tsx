@@ -1,11 +1,11 @@
-import React, { FC, MouseEvent } from "react";
+import { FC, MouseEvent } from "react";
 
 interface RestartButtonProps {
   onClick: (event: MouseEvent<HTMLButtonElement>) => void;
   gameOver: boolean;
 }
 
-const RestartButton: FC<RestartButtonProps> = ({ onClick, gameOver }) => {
+export const NewGameButton: FC<RestartButtonProps> = ({ onClick, gameOver }) => {
   return (
     <button
       onClick={onClick}
@@ -21,9 +21,7 @@ const RestartButton: FC<RestartButtonProps> = ({ onClick, gameOver }) => {
         border: "2px solid #239cb2",
       }}
     >
-      Restart Game
+      New Game
     </button>
   );
 };
-
-export default RestartButton;
