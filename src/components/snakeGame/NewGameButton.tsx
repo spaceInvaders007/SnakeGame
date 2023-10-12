@@ -19,6 +19,7 @@ export const NewGameButton: FC<RestartButtonProps> = ({ onClick, gameOver }) => 
         background: "#07c7d2",
         color: "white",
         border: "2px solid #239cb2",
+        cursor: "pointer",
       }}
     >
       New Game

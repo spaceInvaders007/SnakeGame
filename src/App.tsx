@@ -6,7 +6,7 @@ import { SnakeGame } from "./components/snakeGame/SnakeGame";
 function App() {
   return (
     <div className="App">
-      <div style={{marginTop: '100px'}}>
+      <div style={{marginTop: '50px'}}>
         <SnakeGame />
       </div>
       {/* <header className="App-header">

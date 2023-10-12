@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { GameOver } from "./GameOver";
 import { NewGameButton } from "./NewGameButton";
+import { Score } from "./Score";
 
 const radius = 10;
 const moveAmount = 2 * radius;
@@ -40,10 +41,13 @@ const checkSelfCollision = (
 };
 
 const initialFoodRandomPosition = generateRandomGridPosition();
-const initialSnakePosition = {x: 150, y: 30};
-
+const initialSnakePosition = { x: 150, y: 30 };
 
 export const SnakeGame: React.FC = () => {
+  const [score, setScore] = useState(0);
+  const [highestScore, setHighestScore] = useState(() => {
+    return Number(localStorage.getItem("highestScore") || 0);
+  });
   const [gameOver, setGameOver] = useState<boolean>(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -123,6 +127,9 @@ export const SnakeGame: React.FC = () => {
           if (movementInterval.current !== null) {
             clearInterval(movementInterval.current);
           }
+          if (score > highestScore) {
+            setHighestScore(score);
+          }
           return prevSnake;
         }
 
@@ -130,6 +137,7 @@ export const SnakeGame: React.FC = () => {
 
         if (checkCollision(newHead, foodPos)) {
           setFoodPos(generateRandomGridPosition());
+          setScore((prev) => prev + 1);
         } else {
           newSnake.pop();
         }
@@ -191,16 +199,22 @@ export const SnakeGame: React.FC = () => {
     }
   }, [snake, foodPos]);
 
+  useEffect(() => {
+    localStorage.setItem("highestScore", highestScore.toString());
+  }, [highestScore]);
+
   const handleRestartClick = () => {
     setSnake([initialSnakePosition]);
     setFoodPos(generateRandomGridPosition());
     setCurrentDirection({ x: 0, y: 1 });
     setGameOver(false);
+    setScore(0);
   };
 
   return (
-    <div style={{display: "flex", flexDirection: "column"}}>
-      <NewGameButton onClick={handleRestartClick} gameOver={!!gameOver} /> 
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <Score score={score} highestScore={highestScore} />
+      <NewGameButton onClick={handleRestartClick} gameOver={!!gameOver} />
 
       {gameOver ? <GameOver /> : null}
       <div>
