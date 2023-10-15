@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { GameOver } from "./GameOver";
 import { NewGameButton } from "./NewGameButton";
 import { Score } from "./Score";
+import { CountDown } from "./CountDown";
 
 const radius = 10;
 const moveAmount = 2 * radius;
@@ -49,7 +50,7 @@ export const SnakeGame: React.FC = () => {
     return Number(localStorage.getItem("highestScore") || 0);
   });
   const [gameOver, setGameOver] = useState<boolean>(false);
-
+  const [countdown, setCountdown] = useState<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [foodPos, setFoodPos] = useState<{ x: number; y: number } | null>(
     initialFoodRandomPosition
@@ -204,6 +205,21 @@ export const SnakeGame: React.FC = () => {
   }, [highestScore]);
 
   const handleRestartClick = () => {
+    setCountdown(3);
+    let interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev !== null && prev > 1) {
+          return prev - 1;
+        } else {
+          clearInterval(interval);
+          startNewGame();
+          return null;
+        }
+      });
+    }, 1000);
+  };
+
+  const startNewGame = () => {
     setSnake([initialSnakePosition]);
     setFoodPos(generateRandomGridPosition());
     setCurrentDirection({ x: 0, y: 1 });
@@ -217,7 +233,7 @@ export const SnakeGame: React.FC = () => {
       <NewGameButton onClick={handleRestartClick} gameOver={!!gameOver} />
 
       {gameOver ? <GameOver /> : null}
-      <div>
+      <div style={{ position: "relative" }}>
         <canvas
           ref={canvasRef}
           width={canvasSize}
@@ -227,6 +243,7 @@ export const SnakeGame: React.FC = () => {
             borderRadius: "8px",
           }}
         ></canvas>
+        {countdown && <CountDown countdown={countdown} />}
       </div>
     </div>
   );
